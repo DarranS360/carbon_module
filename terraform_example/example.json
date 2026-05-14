@@ -1,0 +1,138 @@
+{
+  "format_version": "1.1",
+  "terraform_version": "1.6.0",
+  "variables": {},
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_instance.web_server",
+          "type": "aws_instance",
+          "values": {
+            "ami": "ami-0c55b159cbfafe1f0",
+            "instance_type": "m5.xlarge",
+            "availability_zone": "eu-west-1a",
+            "tags": { "Name": "web-server", "Environment": "prod" }
+          }
+        },
+        {
+          "address": "aws_instance.api_server",
+          "type": "aws_instance",
+          "values": {
+            "ami": "ami-0c55b159cbfafe1f0",
+            "instance_type": "c5.2xlarge",
+            "availability_zone": "eu-west-1b",
+            "tags": { "Name": "api-server", "Environment": "prod" }
+          }
+        },
+        {
+          "address": "aws_instance.bastion",
+          "type": "aws_instance",
+          "values": {
+            "ami": "ami-0c55b159cbfafe1f0",
+            "instance_type": "t3.micro",
+            "availability_zone": "eu-west-1a",
+            "tags": { "Name": "bastion", "Environment": "prod" }
+          }
+        },
+        {
+          "address": "aws_ebs_volume.data_disk",
+          "type": "aws_ebs_volume",
+          "values": {
+            "availability_zone": "eu-west-1a",
+            "size": 500,
+            "type": "gp3",
+            "tags": { "Name": "data-disk" }
+          }
+        },
+        {
+          "address": "aws_ebs_volume.logs_disk",
+          "type": "aws_ebs_volume",
+          "values": {
+            "availability_zone": "eu-west-1a",
+            "size": 1000,
+            "type": "st1",
+            "tags": { "Name": "logs-disk" }
+          }
+        }
+      ]
+    }
+  },
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "expressions": {
+          "region": { "constant_value": "eu-west-1" }
+        }
+      }
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "aws_instance.web_server",
+      "type": "aws_instance",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "ami": "ami-0c55b159cbfafe1f0",
+          "instance_type": "m5.xlarge",
+          "availability_zone": "eu-west-1a"
+        }
+      }
+    },
+    {
+      "address": "aws_instance.api_server",
+      "type": "aws_instance",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "ami": "ami-0c55b159cbfafe1f0",
+          "instance_type": "c5.2xlarge",
+          "availability_zone": "eu-west-1b"
+        }
+      }
+    },
+    {
+      "address": "aws_instance.bastion",
+      "type": "aws_instance",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "ami": "ami-0c55b159cbfafe1f0",
+          "instance_type": "t3.micro",
+          "availability_zone": "eu-west-1a"
+        }
+      }
+    },
+    {
+      "address": "aws_ebs_volume.data_disk",
+      "type": "aws_ebs_volume",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "availability_zone": "eu-west-1a",
+          "size": 500,
+          "type": "gp3"
+        }
+      }
+    },
+    {
+      "address": "aws_ebs_volume.logs_disk",
+      "type": "aws_ebs_volume",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "availability_zone": "eu-west-1a",
+          "size": 1000,
+          "type": "st1"
+        }
+      }
+    }
+  ]
+}

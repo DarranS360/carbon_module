@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+/* Field labels — bold and italic for clarity */
+.rjsf label {
+  font-weight: 700;
+  font-style: italic;
+}
+
+/* RJSF form field styling */
+.rjsf input,
+.rjsf select,
+.rjsf textarea {
+  width: 100%;
+  background-color: #ffffff;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.25rem;
+  box-sizing: border-box;
+}
+
+.rjsf input:focus,
+.rjsf select:focus,
+.rjsf textarea:focus {
+  outline: 2px solid #16a34a;
+  outline-offset: 1px;
+  border-color: #16a34a;
+}
+
+:root {
+  color-scheme: light dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
