@@ -25,6 +25,7 @@ const SERVICE_COLORS = {
 };
 
 const ALL_SERVICES = Object.keys(SERVICE_COLORS);
+const formatNumber = (value) => Number(value ?? 0).toFixed(2);
 
 function buildChartData(billingData) {
   if (!billingData?.entries?.length) return [];
@@ -52,11 +53,11 @@ function CustomTooltip({ active, payload, label }) {
       <p className="font-semibold mb-1">{label}</p>
       {payload.filter((p) => p.value > 0).map((p) => (
         <p key={p.dataKey} style={{ color: p.color }}>
-          {p.name}: ${p.value.toFixed(2)}
+          {p.name}: ${formatNumber(p.value)}
         </p>
       ))}
       <p className="border-t border-gray-200 dark:border-gray-700 mt-1 pt-1 font-semibold">
-        Total: ${total.toFixed(2)}
+        Total: ${formatNumber(total)}
       </p>
     </div>
   );
@@ -136,7 +137,7 @@ export default function BillingChart({ useStubData = false }) {
 
       {latestTotal && (
         <div className="rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-3 text-sm text-green-800 dark:text-green-200">
-          Most recent month total: <strong>${latestTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
+          Most recent month total: <strong>${formatNumber(latestTotal)}</strong>
         </div>
       )}
 
@@ -161,7 +162,7 @@ export default function BillingChart({ useStubData = false }) {
               <XAxis dataKey="month" tick={{ fontSize: 12 }} angle={-40} textAnchor="end" interval={0} />
               <YAxis
                 tick={{ fontSize: 12 }}
-                tickFormatter={(v) => `$${v}`}
+                tickFormatter={(v) => `$${formatNumber(v)}`}
                 label={{ value: 'USD', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: 12 } }}
               />
               <Tooltip content={<CustomTooltip />} />

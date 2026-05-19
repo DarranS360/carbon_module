@@ -18,6 +18,7 @@ import { STUB_CCFT_SUMMARY } from '../data/stubData';
 import CarbonEquivalencies from './CarbonEquivalencies';
 
 const MT_TO_G = 1_000_000;
+const formatNumber = (value) => Number(value ?? 0).toFixed(2);
 
 function formatMonth(dateStr) {
   if (!dateStr) return '';
@@ -45,7 +46,7 @@ function CustomTooltip({ active, payload, label }) {
       <p className="font-semibold mb-1">{label}</p>
       {payload.map((p) => (
         <p key={p.dataKey} style={{ color: p.color }}>
-          {p.name}: {p.value != null ? `${p.value.toLocaleString()} gCO₂e` : 'N/A'}
+          {p.name}: {p.value != null ? `${formatNumber(p.value)} gCO₂e` : 'N/A'}
         </p>
       ))}
     </div>
@@ -173,21 +174,24 @@ export default function CcftComparisonChart({ useStubData = false }) {
               <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200">
                 Location-Based Method (LBM)
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Carbon emissions calculated using the actual carbon intensity of the electricity grid
-                in each AWS region. This is the most accurate reflection of the real-world carbon
-                impact of your infrastructure and is directly comparable to the estimates this tool
-                produces. <strong>Use this to understand your true carbon footprint and to benchmark
-                against regional grid improvements over time.</strong>
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Note: CCFT reports in <strong>mtCO₂e</strong> (metric tons); values here have been
-                converted to <strong>gCO₂e</strong> for comparison with the Infrastructure Audit.
-                1 mtCO₂e = 1,000,000 gCO₂e. Only the <strong>AmazonEC2</strong> service category is
-                shown — this covers EC2 instances, EKS worker nodes, and attached EBS volumes,
-                matching the scope of the Infrastructure Audit. Elastic Load Balancers, RDS, and
-                other services are intentionally excluded from this chart.
-              </p>
+              <details className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                <summary className="cursor-pointer text-blue-700 dark:text-blue-300">Method details</summary>
+                <p className="mt-2">
+                  Carbon emissions calculated using the actual carbon intensity of the electricity grid
+                  in each AWS region. This is the most accurate reflection of the real-world carbon
+                  impact of your infrastructure and is directly comparable to the estimates this tool
+                  produces. <strong>Use this to understand your true carbon footprint and to benchmark
+                  against regional grid improvements over time.</strong>
+                </p>
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  Note: CCFT reports in <strong>mtCO₂e</strong> (metric tons); values here have been
+                  converted to <strong>gCO₂e</strong> for comparison with the Infrastructure Audit.
+                  1 mtCO₂e = 1,000,000 gCO₂e. Only the <strong>AmazonEC2</strong> service category is
+                  shown — this covers EC2 instances, EKS worker nodes, and attached EBS volumes,
+                  matching the scope of the Infrastructure Audit. Elastic Load Balancers, RDS, and
+                  other services are intentionally excluded from this chart.
+                </p>
+              </details>
             </div>
             <CcftChart data={lbmData} ec2Color="#3b82f6" />
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 text-center">
@@ -205,14 +209,17 @@ export default function CcftComparisonChart({ useStubData = false }) {
               <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-200">
                 Market-Based Method (MBM)
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Carbon emissions after accounting for renewable energy certificates (RECs) and
-                Power Purchase Agreements (PPAs) that AWS has purchased on your behalf. MBM figures
-                are typically lower than LBM because AWS invests heavily in renewable energy.
-                <strong> Use this for sustainability reporting and ESG disclosures where you want
-                to reflect the benefit of AWS&apos;s renewable energy commitments.</strong> The gap
-                between LBM and MBM represents the carbon offset from those purchases.
-              </p>
+              <details className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                <summary className="cursor-pointer text-purple-700 dark:text-purple-300">Method details</summary>
+                <p className="mt-2">
+                  Carbon emissions after accounting for renewable energy certificates (RECs) and
+                  Power Purchase Agreements (PPAs) that AWS has purchased on your behalf. MBM figures
+                  are typically lower than LBM because AWS invests heavily in renewable energy.
+                  <strong> Use this for sustainability reporting and ESG disclosures where you want
+                  to reflect the benefit of AWS&apos;s renewable energy commitments.</strong> The gap
+                  between LBM and MBM represents the carbon offset from those purchases.
+                </p>
+              </details>
             </div>
             <CcftChart data={mbmData} ec2Color="#8b5cf6" />
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 text-center">

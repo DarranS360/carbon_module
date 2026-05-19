@@ -26,7 +26,7 @@ export default function LiveScan({ useStubData = false }) {
     setResults(null);
 
     if (useStubData) {
-      setResults(getStubLiveScanResults(region));
+      setResults(getStubLiveScanResults(region, cpuUtilisation));
       setLoading(false);
       return;
     }
@@ -56,8 +56,19 @@ export default function LiveScan({ useStubData = false }) {
         <p className="text-gray-500 mt-2">
           {useStubData
             ? 'Using stubbed infrastructure data to demonstrate the audit workflow without AWS credentials.'
-            : 'Inspect running AWS infrastructure in a region to review what is currently deployed, its estimated carbon footprint, and its on-demand cost. Use this to identify over-provisioned or unexpectedly running resources before they appear on your bill or carbon report.'}
+            : 'Inspect running AWS infrastructure in a region to review estimated carbon footprint and on-demand cost.'}
         </p>
+        {!useStubData && (
+          <details className="mt-2 text-left max-w-xl mx-auto">
+            <summary className="cursor-pointer text-sm text-green-700 dark:text-green-400">
+              More audit guidance
+            </summary>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+              Use this to identify over-provisioned or unexpectedly running resources before they appear
+              on your bill or carbon report.
+            </p>
+          </details>
+        )}
       </div>
 
       <div className="w-full max-w-xl flex flex-col gap-4">
@@ -87,9 +98,17 @@ export default function LiveScan({ useStubData = false }) {
           <div className="flex items-center justify-between mb-1">
             <label
               htmlFor="cpu-slider"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1"
             >
               EC2 CPU Utilisation assumption
+              <span
+                role="img"
+                aria-label="Used only for EC2 carbon estimation. The CCF methodology default is 50%. EBS volumes are unaffected."
+                title="Used only for EC2 carbon estimation. The CCF methodology default is 50%. EBS volumes are unaffected."
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-gray-400 text-[10px] text-gray-500 dark:border-gray-500 dark:text-gray-400"
+              >
+                i
+              </span>
             </label>
             <span className="text-sm font-semibold text-green-700 dark:text-green-400 tabular-nums">
               {pct}%
@@ -121,9 +140,6 @@ export default function LiveScan({ useStubData = false }) {
               </button>
             ))}
           </div>
-          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-            Used only for EC2 carbon estimation. The CCF methodology default is 50%. EBS volumes are unaffected.
-          </p>
         </div>
 
         <button

@@ -7,6 +7,10 @@
 
 import CarbonEquivalencies from './CarbonEquivalencies';
 
+function formatNumber(value) {
+  return Number(value ?? 0).toFixed(2);
+}
+
 export function Stat({ label, value }) {
   return (
     <div>
@@ -19,7 +23,12 @@ export function Stat({ label, value }) {
 }
 
 /** Render the full results panel (resource cards + totals banner + skipped list). */
-export function EstimationResults({ results, comparisons, cpuUtilisation }) {
+export function EstimationResults({
+  results,
+  comparisons,
+  cpuUtilisation,
+  showResourceBreakdown = true,
+}) {
   const { resources, totals, skipped } = results;
   const totalEmbodied = totals.embodied_gco2e_month;
   const hasEmbodiedData = totalEmbodied != null || resources.some(
@@ -33,7 +42,6 @@ export function EstimationResults({ results, comparisons, cpuUtilisation }) {
   const ec2 = resources.filter((r) => r.resource_type === 'aws_instance');
   const rds = resources.filter((r) => r.resource_type === 'aws_db_instance');
   const ebs = resources.filter((r) => r.resource_type === 'aws_ebs_volume');
-  const elb = resources.filter((r) => r.resource_type === 'aws_lb');
 
   return (
     <div className="mt-6 space-y-6">
@@ -45,57 +53,63 @@ export function EstimationResults({ results, comparisons, cpuUtilisation }) {
           <div className="rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4">
             <p className="font-semibold text-green-800 dark:text-green-200 mb-2">Energy &amp; Carbon</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <Stat label="Energy (monthly)" value={`${totals.energy_kwh_month} kWh`} />
-              <Stat label="Energy (yearly)" value={`${(totals.energy_kwh_month * 12).toFixed(2)} kWh`} />
-              <Stat label="Operational carbon (monthly)" value={`${totals.carbon_gco2e_month} gCO₂e`} />
-              <Stat label="Operational carbon (yearly)" value={`${(totals.carbon_gco2e_month * 12).toFixed(2)} gCO₂e`} />
+              <Stat label="Energy (monthly)" value={`${formatNumber(totals.energy_kwh_month)} kWh`} />
+              <Stat label="Energy (yearly)" value={`${formatNumber(totals.energy_kwh_month * 12)} kWh`} />
+              <Stat label="Operational carbon (monthly)" value={`${formatNumber(totals.carbon_gco2e_month)} gCO₂e`} />
+              <Stat label="Operational carbon (yearly)" value={`${formatNumber(totals.carbon_gco2e_month * 12)} gCO₂e`} />
               <Stat
                 label="Embodied carbon (monthly)"
-                value={hasEmbodiedData && totalEmbodied != null ? `${totalEmbodied.toFixed(4)} gCO₂e` : 'Unavailable'}
+                value={hasEmbodiedData && totalEmbodied != null ? `${formatNumber(totalEmbodied)} gCO₂e` : 'Unavailable'}
               />
               <Stat
                 label="Total carbon (monthly)"
-                value={totalCombined != null ? `${totalCombined.toFixed(4)} gCO₂e` : 'Operational only'}
+                value={totalCombined != null ? `${formatNumber(totalCombined)} gCO₂e` : 'Operational only'}
               />
             </div>
-            <p className="mt-3 text-xs text-green-700 dark:text-green-300">
-              {hasEmbodiedData
-                ? 'Embodied carbon is region-independent — switching region changes operational carbon only.'
-                : 'Embodied carbon data is unavailable for the current resource set, so totals show operational carbon only.'}
-            </p>
-            <p className="mt-2 text-xs text-green-700 dark:text-green-300">
-              All carbon values are in <strong>gCO₂e</strong>. The AWS CCFT Dashboard reports in{' '}
-              <strong>mtCO₂e</strong> (metric tons); 1 mtCO₂e = 1,000,000 gCO₂e. Use the Dashboard
-              tab to compare these estimates against CCFT actuals.
-            </p>
+            <details className="mt-3">
+              <summary className="cursor-pointer text-sm text-green-700 dark:text-green-300">
+                Carbon totals notes
+              </summary>
+              <div className="mt-2 text-sm text-green-700 dark:text-green-300 space-y-2">
+                <p>
+                  {hasEmbodiedData
+                    ? 'Embodied carbon is region-independent — switching region changes operational carbon only.'
+                    : 'Embodied carbon data is unavailable for the current resource set, so totals show operational carbon only.'}
+                </p>
+                <p>
+                  All carbon values are in <strong>gCO₂e</strong>. The AWS CCFT Dashboard reports in{' '}
+                  <strong>mtCO₂e</strong> (metric tons); 1 mtCO₂e = 1,000,000 gCO₂e.
+                </p>
+              </div>
+            </details>
           </div>
           <CarbonEquivalencies carbonGco2e={totalCombined ?? totals.carbon_gco2e_month} />
           <div className="rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4">
             <p className="font-semibold text-green-800 dark:text-green-200 mb-2">Cost</p>
             <div className="grid grid-cols-2 gap-4">
-              <Stat label="Cost (monthly)" value={`$${totals.cost_usd_month}`} />
-              <Stat label="Cost (yearly)" value={`$${(totals.cost_usd_month * 12).toFixed(2)}`} />
+              <Stat label="Cost (monthly)" value={`$${formatNumber(totals.cost_usd_month)}`} />
+              <Stat label="Cost (yearly)" value={`$${formatNumber(totals.cost_usd_month * 12)}`} />
             </div>
           </div>
         </div>
       )}
 
       {/* Per-resource breakdown */}
-      {ec2.length > 0 && (
+      {showResourceBreakdown && ec2.length > 0 && (
         <ResourceTable
           title="EC2 Instances"
           resources={ec2}
           note={`Direct EC2 instances only. EKS managed nodes appear here as regular EC2 instances — they are included in AWS CCFT under 'AmazonEC2'. Fargate tasks are not visible. Carbon estimated at ${cpuUtilisation != null ? Math.round(cpuUtilisation * 100) : 50}% CPU utilisation.`}
         />
       )}
-      {rds.length > 0 && (
+      {showResourceBreakdown && rds.length > 0 && (
         <ResourceTable
           title="RDS Instances"
           resources={rds}
           note="Available RDS instances in this region. Aurora Serverless and instances in other accounts are not included."
         />
       )}
-      {ebs.length > 0 && (
+      {showResourceBreakdown && ebs.length > 0 && (
         <ResourceTable
           title="EBS Volumes"
           resources={ebs}
@@ -117,10 +131,22 @@ export function EstimationResults({ results, comparisons, cpuUtilisation }) {
 /** Per-resource breakdown table. */
 function ResourceTable({ title, resources, note }) {
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-      <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <p className="font-semibold text-sm">{title} <span className="font-normal text-gray-500 dark:text-gray-400">({resources.length})</span></p>
-      </div>
+    <details className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <summary className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 cursor-pointer">
+        <p className="font-semibold text-sm flex items-center gap-2">
+          <span>
+            {title} <span className="font-normal text-gray-500 dark:text-gray-400">({resources.length})</span>
+          </span>
+          <span
+            role="img"
+            aria-label={note}
+            title={note}
+            className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-gray-400 text-[10px] text-gray-500 dark:border-gray-500 dark:text-gray-400"
+          >
+            i
+          </span>
+        </p>
+      </summary>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -140,22 +166,19 @@ function ResourceTable({ title, resources, note }) {
                   <p className="font-medium text-gray-900 dark:text-gray-100 font-mono text-xs">{r.address}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">{r.region}</p>
                 </td>
-                <td className="px-4 py-2 text-right">{r.carbon.carbon_gco2e_month} gCO₂e</td>
+                <td className="px-4 py-2 text-right">{formatNumber(r.carbon.carbon_gco2e_month)} gCO₂e</td>
                 <td className="px-4 py-2 text-right">
-                  {r.carbon.embodied_gco2e_month != null ? `${r.carbon.embodied_gco2e_month} gCO₂e` : '—'}
+                  {r.carbon.embodied_gco2e_month != null ? `${formatNumber(r.carbon.embodied_gco2e_month)} gCO₂e` : '—'}
                 </td>
-                <td className="px-4 py-2 text-right">{r.carbon.energy_kwh_month} kWh</td>
-                <td className="px-4 py-2 text-right">{r.cost ? `$${r.cost.cost_usd_month}` : '—'}</td>
-                <td className="px-4 py-2 text-right">{r.cost ? `$${(r.cost.cost_usd_month * 12).toFixed(2)}` : '—'}</td>
+                <td className="px-4 py-2 text-right">{formatNumber(r.carbon.energy_kwh_month)} kWh</td>
+                <td className="px-4 py-2 text-right">{r.cost ? `$${formatNumber(r.cost.cost_usd_month)}` : '—'}</td>
+                <td className="px-4 py-2 text-right">{r.cost ? `$${formatNumber(r.cost.cost_usd_month * 12)}` : '—'}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-        <p className="text-xs text-gray-400 dark:text-gray-500 italic">{note}</p>
-      </div>
-    </div>
+    </details>
   );
 }
 
@@ -207,14 +230,14 @@ export function RegionComparisonPanel({ comparisons }) {
               </div>
               <div className="text-right">
                 <p className="text-sm font-semibold">
-                  Operational: {resource.carbon.carbon_gco2e_month} gCO₂e/mo
+                  Operational: {formatNumber(resource.carbon.carbon_gco2e_month)} gCO₂e/mo
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Embodied: {resource.carbon.embodied_gco2e_month != null ? `${resource.carbon.embodied_gco2e_month} gCO₂e/mo` : '—'}
+                  Embodied: {resource.carbon.embodied_gco2e_month != null ? `${formatNumber(resource.carbon.embodied_gco2e_month)} gCO₂e/mo` : '—'}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {resource.carbon.energy_kwh_month} kWh/mo
-                  {resource.cost ? ` · $${resource.cost.cost_usd_month}/mo` : ''}
+                  {formatNumber(resource.carbon.energy_kwh_month)} kWh/mo
+                  {resource.cost ? ` · $${formatNumber(resource.cost.cost_usd_month)}/mo` : ''}
                 </p>
               </div>
             </div>

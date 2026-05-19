@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 import client from '../api/client';
@@ -97,8 +97,15 @@ export default function ResourceForm({ resourceType }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const formId = useId();
+  const resultsRef = useRef(null);
 
   const schema = SCHEMA_MAP[resourceType];
+
+  useEffect(() => {
+    if (results && resultsRef.current) {
+      resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [results]);
 
   if (!schema) {
     return (
@@ -188,7 +195,15 @@ export default function ResourceForm({ resourceType }) {
         </div>
       )}
 
-      {results && <EstimationResults results={results} comparisons={comparisons} />}
+      {results && (
+        <div ref={resultsRef}>
+          <EstimationResults
+            results={results}
+            comparisons={comparisons}
+            showResourceBreakdown={false}
+          />
+        </div>
+      )}
     </div>
   );
 }

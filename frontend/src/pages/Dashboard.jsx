@@ -11,6 +11,17 @@ export default function Dashboard({ useStubData = false }) {
             ? 'Stubbed carbon and cost data to demonstrate dashboard functionality.'
             : 'Real carbon and cost data for your AWS account from CCFT and Cost Explorer.'}
         </p>
+        {!useStubData && (
+          <details className="mt-2 text-left max-w-xl mx-auto">
+            <summary className="cursor-pointer text-sm text-green-700 dark:text-green-400">
+              Data source details
+            </summary>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+              Carbon is pulled from AWS Customer Carbon Footprint Tool (CCFT) and cost data is pulled
+              from AWS Cost Explorer to compare environmental and financial trends month by month.
+            </p>
+          </details>
+        )}
       </div>
 
       <CcftComparisonChart useStubData={useStubData} />

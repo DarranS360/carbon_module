@@ -36,13 +36,64 @@ export const STUB_LIVE_SCAN_RESULTS = {
   },
 };
 
-export function getStubLiveScanResults(region) {
-  return {
-    ...STUB_LIVE_SCAN_RESULTS,
-    resources: STUB_LIVE_SCAN_RESULTS.resources.map((resource) => ({
+const REGION_OPERATIONAL_MULTIPLIER = {
+  'eu-west-1': 1.00,
+  'eu-west-2': 1.12,
+  'us-east-1': 1.28,
+};
+
+const REGION_COST_MULTIPLIER = {
+  'eu-west-1': 1.00,
+  'eu-west-2': 1.04,
+  'us-east-1': 0.96,
+};
+
+export function getStubLiveScanResults(region, cpuUtilisation = 0.5) {
+  const cpuScale = cpuUtilisation / 0.5;
+  const operationalScale = REGION_OPERATIONAL_MULTIPLIER[region] ?? 1;
+  const costScale = REGION_COST_MULTIPLIER[region] ?? 1;
+
+  const resources = STUB_LIVE_SCAN_RESULTS.resources.map((resource) => {
+    const isEc2 = resource.resource_type === 'aws_instance';
+    const energy = isEc2 ? resource.carbon.energy_kwh_month * cpuScale : resource.carbon.energy_kwh_month;
+    const operational = (isEc2 ? resource.carbon.carbon_gco2e_month * cpuScale : resource.carbon.carbon_gco2e_month) * operationalScale;
+
+    return {
       ...resource,
       region,
-    })),
+      carbon: {
+        ...resource.carbon,
+        energy_kwh_month: Number(energy.toFixed(2)),
+        carbon_gco2e_month: Number(operational.toFixed(2)),
+      },
+      cost: resource.cost
+        ? {
+            ...resource.cost,
+            cost_usd_month: Number((resource.cost.cost_usd_month * costScale).toFixed(2)),
+          }
+        : null,
+    };
+  });
+
+  const totals = resources.reduce(
+    (acc, resource) => ({
+      energy_kwh_month: acc.energy_kwh_month + (resource.carbon?.energy_kwh_month ?? 0),
+      carbon_gco2e_month: acc.carbon_gco2e_month + (resource.carbon?.carbon_gco2e_month ?? 0),
+      embodied_gco2e_month: acc.embodied_gco2e_month + (resource.carbon?.embodied_gco2e_month ?? 0),
+      cost_usd_month: acc.cost_usd_month + (resource.cost?.cost_usd_month ?? 0),
+    }),
+    { energy_kwh_month: 0, carbon_gco2e_month: 0, embodied_gco2e_month: 0, cost_usd_month: 0 },
+  );
+
+  return {
+    ...STUB_LIVE_SCAN_RESULTS,
+    resources,
+    totals: {
+      energy_kwh_month: Number(totals.energy_kwh_month.toFixed(2)),
+      carbon_gco2e_month: Number(totals.carbon_gco2e_month.toFixed(2)),
+      embodied_gco2e_month: Number(totals.embodied_gco2e_month.toFixed(2)),
+      cost_usd_month: Number(totals.cost_usd_month.toFixed(2)),
+    },
   };
 }
 
