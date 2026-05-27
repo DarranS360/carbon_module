@@ -139,18 +139,13 @@ def estimate_ec2(
     max_w = watts["max"]
     grid  = GRID_INTENSITY[region]
 
-    # Step 1: Calculate average watt draw based on utilisation
     # This is the CCF interpolation formula
     avg_watts = min_w + (cpu_utilisation * (max_w - min_w))
 
-    # Step 2: Convert to kWh over the period
     # Divide by 1000 to go from Wh to kWh
     energy_kwh = (avg_watts * hours) / 1000
-
-    # Step 3: Apply PUE (datacenter overhead - cooling, power distribution etc)
     energy_kwh_with_pue = energy_kwh * PUE
 
-    # Step 4: Multiply by grid carbon intensity to get gCO2e
     # Grid intensity is in kgCO2e/kWh, multiply by 1000 for grams
     carbon_gco2e = energy_kwh_with_pue * grid * 1000
     embodied_gco2e = estimate_embodied(instance_type=instance_type, hours=hours)

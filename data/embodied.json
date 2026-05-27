@@ -1,5 +1,5 @@
 {
-  "_fetched_at": "2026-05-11T10:14:25.484776+00:00",
+  "_fetched_at": "2026-05-19T12:47:47.175117+00:00",
   "_note": "Embodied carbon is region-independent. Values are per instance type and converted to gCO2e/month at runtime.",
   "_source": "Boavizta API /v1/cloud/instance impacts.gwp.embedded.value (kgCO2e/hour, amortised)",
   "c5.18xlarge": 0.013,
