@@ -151,9 +151,3 @@ against the same account.  Compare total operational carbon figures.
 4. **Grid intensity vintage** — the module uses annual-average CCF grid
    intensity values; CCFT uses AWS's own marginal intensity figures.
 
-**Academic value:** this comparison answers the question that actually
-matters for an estimation tool — *are the outputs directionally correct in
-practice?* — and quantifies the gap so that a reader can understand the
-assumptions driving any remaining difference.  It is more informative than
-any number of unit tests because it validates the methodology, not just the
-arithmetic.
